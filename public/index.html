@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DUDAO'S CHAT</title>
+    <style>
+        body {
+            display: flex; 
+            padding: 0 !important;
+            margin: 0 !important;
+            height: 100vh;
+            background: linear-gradient(109.6deg, rgb(252, 255, 26) 34.9%, rgb(66, 240, 233) 82.5%);
+        }
+
+        #menuLateral {
+            box-shadow: 11px 0px 16px 0px rgba(0,0,0,0.75);
+            height: 100vh;
+            background-color: rgb(240, 240, 240);
+            width: 230px;
+        }
+
+        #menuLateral > :nth-child(1) {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        #menuLateral > :nth-child(2) {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .msgbar {
+            box-shadow: -1px 0px 16px 0px rgba(0,0,0,0.75);
+            height: 200px;
+            position: absolute;
+            top: 90%;
+            left: 50%;
+            transform: translate(-50%, -100%);
+            width: 60%;
+            display: grid;
+            grid-template-rows: 100%;
+            grid-template-columns: 45% 45% auto;
+            background-color: white;
+        }
+
+        .msgbar > input {
+            height: 100px;
+            margin: 10px;
+            border-radius: 20px;
+            padding: 10px;
+            font-size: 20px;
+        } 
+
+        .message {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            height: 100px;
+            padding: 20px;
+            border-radius: 20px;
+            width: 60vw;
+            font-size: 20px;
+            background-color: white;
+            box-shadow: -1px 0px 16px 0px rgba(0,0,0,0.75);
+        }
+
+        .messagecontainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translate(-50%, 0);
+            width: 70vw; 
+            height: 70vh;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="menuLateral">
+        
+        <div>
+            <h3>Chat do Dudão</h3>
+        </div>
+        <div id="participantes">
+
+        </div>
+    </div>
+
+    <div id="messagecontainer" class="messagecontainer">
+    <!--<div class="message">
+            <span>Quem enviou: Enrico</span>
+            <div>
+                ola
+            </div>
+        </div>
+    -->
+    </div>
+
+    <div class="msgbar">
+        <input id="PESSOA" placeholder="Pessoa">
+        <input id="MENSAGEM" placeholder="Mensagem">
+        <button id="submit"  type="button">Enviar ></button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        document.getElementById('submit').addEventListener('click', enviaMensagemPraGeral)
+
+        async function enviaMensagemPraGeral() {
+            const mensagem = document.getElementById('MENSAGEM').value
+            const usuario = document.getElementById('PESSOA').value
+
+            await axios.post('http://195.35.37.40:2050/api/mensagem', {
+                "mensagem": mensagem,
+                "quemEnviou": usuario
+            })
+        }
+
+        function addMessage(message) {
+            /*
+                CORPO ESPERADO:
+
+                {
+                    "mensagem": "mensagem exemplo",
+                    "quemEnviou": "fulano beltrano"
+                }
+            */
+            const mensagem = JSON.parse(message)
+            const divMensagens = document.getElementById('messagecontainer')
+            console.log(mensagem)
+            const mensagemDiv = document.createElement('div')
+            mensagemDiv.className = 'message'
+            const spanQuemEnviou = document.createElement('span')
+            spanQuemEnviou.textContent = `Usuário ${mensagem.quemEstaEnviando}`
+            const divConteudoMensagem = document.createElement('div') 
+            divConteudoMensagem.textContent = mensagem.mensagem
+            mensagemDiv.appendChild(spanQuemEnviou)
+            mensagemDiv.appendChild(divConteudoMensagem)
+
+            divMensagens.appendChild(mensagemDiv)
+                
+        }
+        // Conectar-se ao servidor WebSocket
+        const socket = new WebSocket('ws://localhost:3050');
+
+        // Lidar com a abertura da conexão
+        socket.addEventListener('open', (event) => {
+            console.log('Conectado ao servidor WebSocket.');
+        });
+
+        // Lidar com mensagens recebidas do servidor
+        socket.addEventListener('message', (event) => {
+            const message = event.data;
+            addMessage(message);
+        });
+
+        // Lidar com o fechamento da conexão
+        socket.addEventListener('close', (event) => {
+            console.log('Conexão fechada.');
+        });
+    </script>
+</body>
+</html>
