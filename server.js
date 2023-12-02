@@ -34,6 +34,7 @@ servidor.post('/api/mensagem', (req, res) => {
             "quemEnviou": "fulano beltrano"
         }
     */
+   console.log(pessoasConectadas.length)
    pessoasConectadas.forEach((pessoa) => pessoa.send(JSON.stringify(notificacao(corpoDeRequisicao.mensagem, corpoDeRequisicao.quemEnviou))))
    return res.status(200).json({})
 })
